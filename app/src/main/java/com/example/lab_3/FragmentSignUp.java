@@ -1,64 +1,144 @@
 package com.example.lab_3;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link FragmentSignUp#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class FragmentSignUp extends Fragment {
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+import com.example.lab_3.R;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+import static android.content.Context.MODE_PRIVATE;
 
-    public FragmentSignUp() {
-        // Required empty public constructor
-    }
+public class FragmentSignUp extends Fragment implements View.OnClickListener {
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FragmentSignUp.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static FragmentSignUp newInstance(String param1, String param2) {
-        FragmentSignUp fragment = new FragmentSignUp();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    private EditText username;
+    private EditText password;
+    private EditText confirmPassword;
+    private Button confirm;
+    private ImageButton cross;
+
+    SharedPreferences sp;
+
+    public final static String USERNAME = "com.example.calc_log_sign.USERNAME";
+    public final static String PASSWORD = "com.example.calc_log_sign.PASSWORD";
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        return inflater.inflate(R.layout.fragment_sign_up, container, false);
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        sp = getActivity().getSharedPreferences("login", MODE_PRIVATE);
+
+        username = getView().findViewById(R.id.signup_username);
+        password = getView().findViewById(R.id.signup_password);
+        confirmPassword = getView().findViewById(R.id.confirmPassword);
+        confirm = getView().findViewById(R.id.buttonConfirmSign);
+        cross = getView().findViewById(R.id.buttonCross);
+
+        confirm.setOnClickListener(this);
+        cross.setOnClickListener(this);
+
+        if (!sp.getBoolean("isTablet", true))
+            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.buttonConfirmSign:
+                onClickConfirm();
+                break;
+            case R.id.buttonCross:
+                onClickCross();
+                break;
+        }
+
+    }
+
+    public void onClickCross(){
+        getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
+        onClickListener listener = (onClickListener) getActivity();
+        listener.onCancelClicked();
+    }
+
+    public void onClickConfirm () {
+        //...
+        boolean isCorrect = true;
+        closeKeyboard();
+
+        if (!checkUsername()) {
+            username.setError(getString(R.string.username_error));
+            isCorrect = false;
+        }
+        if (!checkPassword()) {
+            password.setError(getString(R.string.password_error));
+            isCorrect = false;
+        }
+
+        if (!checkConfirmPassword()) {
+            confirmPassword.setError(getString(R.string.confirm_password_error));
+            isCorrect = false;
+        }
+
+        if (isCorrect) {
+            sp.edit().putString("username", username.getText().toString()).apply();
+            sp.edit().putString("password", password.getText().toString()).apply();
+
+            onClickListener listener = (onClickListener) getActivity();
+            listener.onConfirmSignClicked();
         }
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_sign_up, container, false);
+    private void closeKeyboard() {
+        View view = getActivity().getCurrentFocus();
+        if(view != null){
+            InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
+
+    private boolean checkPassword() {
+        String pattern = "^(?=.*[0-9])(?=.*[a-z])(?=\\S+$).{8,}$";
+        //String pattern = "^.{8,}$";
+        if (password.getText().toString().matches(pattern))
+            return true;
+        else
+            return false;
+    }
+    private boolean checkConfirmPassword() {
+        if (confirmPassword.getText().toString().equals(password.getText().toString()))
+            return true;
+        else
+            return false;
+    }
+    private boolean checkUsername() {
+        String pattern = "^(?=.*[a-z])(?=\\S+$).{4,16}$";
+        if (username.getText().toString().matches(pattern))
+            return true;
+        else
+            return false;
+
+    }
+
+    public interface onClickListener {
+        void onConfirmSignClicked();
+        void onCancelClicked();
+    }
+
 }
