@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-
 public class ListAdapter extends BaseAdapter {
 
     Context context;

@@ -27,7 +27,7 @@ public class FragmentList extends Fragment implements View.OnClickListener {
     Button buttonAdd;
     private ArrayList<Uri> images;
     private ArrayList<Uri> songs;
-    private static ListAdapter adapter;
+    private static ListAdapterCustom adapter;
     private ListView list;
 
 
@@ -43,7 +43,7 @@ public class FragmentList extends Fragment implements View.OnClickListener {
 
         images = new ArrayList<>();
         songs = new ArrayList<>();
-        adapter = new ListAdapter(getActivity().getApplicationContext(), images, songs);
+        adapter = new ListAdapterCustom(getActivity().getApplicationContext(), images, songs);
         list.setAdapter(adapter);
         list.setScrollingCacheEnabled(false);
 
