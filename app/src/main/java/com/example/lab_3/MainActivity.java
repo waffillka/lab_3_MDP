@@ -14,17 +14,22 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements
-        com.example.lab_3.FragmentLogIn.onClickListener,
-        com.example.lab_3.FragmentSignUp.onClickListener{
 
-    SharedPreferences sp;
+public class MainActivity extends AppCompatActivity
+        implements FragmentList.OnAddButtonListener,
+        FragmentPick.OnButtonClickListener,
+        FragmentLogIn.onClickListener,
+        FragmentSignUp.onClickListener
+{
+
     private final int PERMISSION_REQUEST_CODE = 1;
+
     private Button buttonAdd;
+
+    SharedPreferences sp; // хранилище
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +54,6 @@ public class MainActivity extends AppCompatActivity implements
         ft.commit();
     }
 
-    private void buttonSetActive(){
-        buttonAdd.setClickable(true);
-        buttonAdd.setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.my_button));
-        buttonAdd.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
-    }
-
     public void AddOnClick(View view){
     }
 
@@ -72,6 +71,49 @@ public class MainActivity extends AppCompatActivity implements
                 }
                 break;
         }
+    }
+
+    @Override
+    public void onAddButtonClicked(Button add) {
+
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        FragmentPick frag = new FragmentPick();
+
+        ft.replace(R.id.pick_layout, frag, "fragment_pick");
+        ft.addToBackStack(null);
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+
+        ft.commit();
+
+        buttonAdd = add;
+        buttonAdd.setClickable(false);
+        buttonAdd.setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.rect));
+        buttonAdd.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.colorGreyLight));
+    }
+
+    private void buttonSetActive(){
+        buttonAdd.setClickable(true);
+        buttonAdd.setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.my_button));
+        buttonAdd.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
+    }
+
+    @Override
+    public void onCloseButtonClicked() {
+        buttonSetActive();
+        FragmentManager fm = getSupportFragmentManager();
+        fm.popBackStack();
+    }
+
+    @Override
+    public void onConfirmButtonClicked(Uri imageUri, Uri musicUri) {
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentList frag = (FragmentList) fm.findFragmentById(R.id.list_layout);
+        frag.setImageMusic(imageUri, musicUri);
+
+        buttonSetActive();
+        fm.popBackStack();
+        Toast.makeText(this,"Posted", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -146,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements
             } else
                 dialogOnClick();
         }
-        else if (fm.findFragmentById(R.id.list_layout) instanceof com.example.gallery.FragmentSignUp)
+        else if (fm.findFragmentById(R.id.list_layout) instanceof FragmentSignUp)
             onCancelClicked();
         else
             finish();
@@ -176,3 +218,4 @@ public class MainActivity extends AppCompatActivity implements
         alert.show();
     }
 }
+
