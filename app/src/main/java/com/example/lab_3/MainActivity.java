@@ -19,9 +19,12 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements
-        com.example.gallery.FragmentSignUp.onClickListener{
+        com.example.lab_3.FragmentLogIn.onClickListener,
+        com.example.lab_3.FragmentSignUp.onClickListener{
 
     SharedPreferences sp;
+    private final int PERMISSION_REQUEST_CODE = 1;
+    private Button buttonAdd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +44,57 @@ public class MainActivity extends AppCompatActivity implements
             FragmentList frag = new FragmentList();
             ft.replace(R.id.list_layout, frag, "fragment_list");
         }
+        ft.addToBackStack(null);
+
+        ft.commit();
+    }
+
+    private void buttonSetActive(){
+        buttonAdd.setClickable(true);
+        buttonAdd.setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.my_button));
+        buttonAdd.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
+    }
+
+    public void AddOnClick(View view){
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //permission was granted
+                    //pickImageFromGallery();
+                } else {
+                    //permission was denied
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onLogInClicked(String name) {
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+
+        FragmentList frag = new FragmentList();
+
+        ft.replace(R.id.list_layout, frag, "fragment_list");
+        ft.addToBackStack(null);
+
+        ft.commit();
+    }
+
+    @Override
+    public void onSignUpClicked() {
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+
+        FragmentSignUp frag = new FragmentSignUp();
+
+        ft.replace(R.id.list_layout, frag, "fragment_sign");
         ft.addToBackStack(null);
 
         ft.commit();
